@@ -1,5 +1,5 @@
-import { query } from "@lib/db";
-import { DbException } from "@lib/exception/dbException";
+import { query } from "@lib/server/db";
+import { DbException } from "@lib/server/exception/dbException";
 
 export class StateMachineDal {
   async getStateById(id: number) {

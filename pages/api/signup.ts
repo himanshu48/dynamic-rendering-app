@@ -1,6 +1,6 @@
-import { StateMachineDal } from "@lib/dal/stateMachine";
-import { StateMachineParamsDal } from "@lib/dal/stateMachineParameters";
-import { StateMachineRoutingDal } from "@lib/dal/stateMachineRouting";
+import { StateMachineDal } from "@lib/server/dal/stateMachine";
+import { StateMachineParamsDal } from "@lib/server/dal/stateMachineParameters";
+import { StateMachineRoutingDal } from "@lib/server/dal/stateMachineRouting";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {

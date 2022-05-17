@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { StateMachineDal } from "@lib/dal/stateMachine";
-import { StateMachineParamsDal } from "@lib/dal/stateMachineParameters";
+import { StateMachineDal } from "@lib/server/dal/stateMachine";
+import { StateMachineParamsDal } from "@lib/server/dal/stateMachineParameters";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {
