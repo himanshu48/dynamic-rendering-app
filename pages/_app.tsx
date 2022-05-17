@@ -1,6 +1,8 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useEffect, useState } from 'react'
+import { Provider } from 'react-redux'
+import { store } from '../lib/redux/store';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -8,7 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(()=>{
     fetch('/api/assets').then(res => res.json()).then(res=> setAssets(res))
   },[])
-  return <Component assets={assets} {...pageProps} />
+  return <Provider store={store}><Component assets={assets} {...pageProps} /></Provider>
 }
 
 export default MyApp
