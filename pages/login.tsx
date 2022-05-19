@@ -20,10 +20,9 @@ const Login: FC<ILoginProps> = (props) => {
       body: JSON.stringify({ stateId: null, requestParams: {} }),
     })
       .then((res) => res.json())
-      .then((res) => setStepInfo(res));
+      .then((res) => setStepInfo(res.responseData));
   }, []);
   console.log(stepInfo);
-  console.log(props.assets);
 
 
   return stateParam && stateMachine && stepInfo ? (

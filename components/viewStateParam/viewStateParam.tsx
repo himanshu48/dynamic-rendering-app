@@ -30,7 +30,7 @@ const ViewStateParam: FC<IViewStateParamProps> = (props) => {
     stateParamOrder.map((stateKey: string) => {
       return (
         stateParam && (
-          <div className="dynamic-container">
+          <div key={stateKey} className="dynamic-container">
             <DynamicField paramType={nextStateParam[stateKey]?.paramType} />
           </div>
         )

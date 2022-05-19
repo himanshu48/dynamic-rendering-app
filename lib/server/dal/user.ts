@@ -20,7 +20,7 @@ export class UserDal {
   }
 
   async getUserByUsername(username: string) {
-    const res = await query("SELECT * FROM user WHERE username=$1", [
+    const res = await query("SELECT * FROM user_details WHERE username=$1", [
       username,
     ]);
     if (res.rowCount > 0) {

@@ -6,6 +6,7 @@ const pool = new Pool({
   host: process.env.PGSQL_HOST,
   port: parseInt(process.env.PGSQL_PORT || "5432"),
   database: process.env.PGSQL_DATABASE,
+  max: 5,
 });
 
 const state_machine = `
