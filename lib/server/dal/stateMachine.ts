@@ -1,5 +1,5 @@
 import { query } from "@lib/server/db";
-import { DbException } from "@lib/server/exception/dbException";
+import { Exception } from "@lib/server/exception/exception";
 
 export class StateMachineDal {
   async getStateById(id: number) {
@@ -17,6 +17,6 @@ export class StateMachineDal {
   }
 
   private throwError(status: number, msg: string) {
-    throw new DbException(status, msg);
+    throw new Exception(status, msg);
   }
 }

@@ -12,7 +12,7 @@ const state_machine = `
     CREATE TABLE IF NOT EXISTS "state_machine" (
 	    "state_id" SERIAL PRIMARY KEY,
 	    "state_name" VARCHAR(100) NOT NULL,
-	    "state_token" VARCHAR(100) NOT NULL,
+	    "state_key" VARCHAR(100) NOT NULL UNIQUE,
 	    "description" VARCHAR(200),
 	    "parameter_order" VARCHAR(100) NOT NULL,
 	    "title" VARCHAR(100)
@@ -28,7 +28,7 @@ const state_machine_routing = `
 const state_machine_parameters = `
     CREATE TABLE IF NOT EXISTS "state_machine_parameters" (
 	    "state_param_id" SERIAL PRIMARY KEY,
-	    "state_param_key" VARCHAR(100) NOT NULL,
+	    "state_param_key" VARCHAR(100) NOT NULL UNIQUE,
       "min_length" integer,
       "max_length" integer,
 	    "param_type" VARCHAR(20) NOT NULL,
@@ -37,9 +37,19 @@ const state_machine_parameters = `
       "valid_possible_values" VARCHAR(200),
 	    "optional_field" boolean
     );`;
+
+const user = `
+  CREATE TABLE IF NOT EXISTS "user_details" (
+    "id" SERIAL PRIMARY KEY,
+    "name" VARCHAR(50) NOT NULL,
+    "username" VARCHAR(50) NOT NULL UNIQUE,
+    "email" VARCHAR(100) NOT NULL UNIQUE,
+    "password" VARCHAR(100) NOT NULL
+  );`;
 pool.query(state_machine);
 pool.query(state_machine_routing);
 pool.query(state_machine_parameters);
+pool.query(user);
 
 export const query = async (text: string, params: any[]) => {
   // const start = Date.now();

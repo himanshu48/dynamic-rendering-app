@@ -26,7 +26,7 @@ export default async function handler(
         parameterOrder: c.parameter_order,
         stateId: c.state_id,
         stateName: c.state_name,
-        stateToken: c.state_token,
+        stateKey: c.state_key,
         title: c.title,
       },
     }),

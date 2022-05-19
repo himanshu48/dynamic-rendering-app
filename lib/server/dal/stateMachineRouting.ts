@@ -1,5 +1,5 @@
 import { query } from "@lib/server/db";
-import { DbException } from "@lib/server/exception/dbException";
+import { Exception } from "@lib/server/exception/exception";
 
 export class StateMachineRoutingDal {
   async getNextStateIdById(opId: string, currentStateId: number) {
@@ -11,6 +11,6 @@ export class StateMachineRoutingDal {
 }
 
   private throwError(status: number, msg: string) {
-    throw new DbException(status, msg);
+    throw new Exception(status, msg);
   }
 }
