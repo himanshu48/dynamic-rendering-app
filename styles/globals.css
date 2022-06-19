@@ -14,3 +14,15 @@ a {
 * {
   box-sizing: border-box;
 }
+
+
+.small-page{
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 15px;
+}
+
+.page-title{
+  text-align: center;
+}

@@ -5,18 +5,25 @@ interface IViewStateParamProps {
   stateParam: any;
   stateMachine: any;
   stepInfo: any;
+  onEventCallback: (action:string, value: any) => void
 }
 
 const ViewStateParam: FC<IViewStateParamProps> = (props) => {
-  const { stateParam, stateMachine, stepInfo } = props;
+  const {onEventCallback, stateParam, stateMachine, stepInfo } = props;
   const [nextStateParam, setNextStateParam] = useState<any>(null);
   const [stateParamOrder, setStateParamOrder] = useState<any>([]);
+  const [formValue, setFormValue] = useState<any>({});
 
   useEffect(() => {
     const tempParam = stepInfo?.nextStateParams;
     Object.keys(tempParam).forEach((stateId: string) => {
       tempParam[stateId] = {
         paramType: stateParam[stateId]?.paramType,
+        label: stateParam[stateId]?.displayLabel,
+        minLength: stateParam[stateId]?.minLength,
+        maxLength: stateParam[stateId]?.maxLength,
+        helpText: stateParam[stateId]?.helpText,
+        radioValues: stateParam[stateId]?.validPossibleValues,
       };
     });
     setNextStateParam(tempParam);
@@ -24,16 +31,37 @@ const ViewStateParam: FC<IViewStateParamProps> = (props) => {
       stateMachine[stepInfo?.nextStateId]?.parameterOrder?.split(",") || []
     );
   }, []);
+
+  const onValueChange = (key:string, value:string) => {
+    const temp = {...formValue}
+    temp[key] = value
+    setFormValue(temp)
+  }
+  const onActionCallback = (action:string) => {
+    const temp = {
+      stateId: stepInfo?.nextStateId,
+      requestParams: formValue
+    }
+    onEventCallback(action, temp)
+  }
+
   return (
     nextStateParam &&
     Object.keys(nextStateParam).length > 0 &&
-    stateParamOrder.map((stateKey: string) => {
+    stateParamOrder.map((stateId: string) => {
       return (
-        stateParam && (
-          <div key={stateKey} className="dynamic-container">
-            <DynamicField paramType={nextStateParam[stateKey]?.paramType} />
-          </div>
-        )
+        <div key={stateId} className="dynamic-container">
+          <DynamicField
+            paramType={nextStateParam[stateId]?.paramType}
+            label={nextStateParam[stateId]?.label}
+            minLength={nextStateParam[stateId]?.minLength}
+            maxLength={nextStateParam[stateId]?.maxLength}
+            helpText={nextStateParam[stateId]?.helpText}
+            radioValues={nextStateParam[stateId]?.radioValues}
+            onValueChange={(value:string) => onValueChange(stateId, value)}
+            onAction={onActionCallback}
+          />
+        </div>
       );
     })
   );

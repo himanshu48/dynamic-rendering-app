@@ -1,9 +1,11 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import pageReducer from './slices/pageSlice';
+import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
+import mainSlice from "./slices/mainSlice";
+import pageReducer from "./slices/pageSlice";
 
 export const store = configureStore({
   reducer: {
     page: pageReducer,
+    main: mainSlice,
   },
 });
 

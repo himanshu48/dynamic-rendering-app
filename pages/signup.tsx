@@ -1,4 +1,7 @@
 import ViewStateParam from "@components/viewStateParam/viewStateParam";
+import { IStepInfo } from "@lib/client/interface/stepInfo";
+import { fetchSignup } from "@lib/client/services/stepInfo";
+import { useRouter } from "next/router";
 import { FC, useEffect, useState } from "react";
 
 interface ISignupProps {
@@ -6,32 +9,40 @@ interface ISignupProps {
 }
 
 const Signup: FC<ISignupProps> = (props) => {
+  const router = useRouter();
   const stateParam = props.assets?.stateParams;
   const stateMachine = props.assets?.stateMachine;
 
-  const [stepInfo, setStepInfo] = useState<null>(null);
+  const [stepInfo, setStepInfo] = useState<IStepInfo | null>(null);
 
   useEffect(() => {
-    fetch("/api/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ stateId: null, requestParams: {} }),
-    })
-      .then((res) => res.json())
-      .then((res) => setStepInfo(res.responseData));
+    async function fetchData() {
+      const res = await fetchSignup({ stateId: null, requestParams: {} });
+      setStepInfo(res.responseData);
+    }
+    fetchData();
   }, []);
-  console.log(stepInfo);
 
+  const onEventCallback = async (action: string, value: any) => {
+    if (action === "submit") {
+      const res = await fetchSignup(value);
+      if (res.responseData.operationCompleted){
+        router.push("/login")
+        setStepInfo(null)
+      } else {
+        setStepInfo(res.responseData);
+      }
+    }
+  };
 
   return stateParam && stateMachine && stepInfo ? (
-    <div>
-      <h2>Signup</h2>
+    <div className="small-page">
+      <h2 className="page-title">{stateMachine[stepInfo?.nextStateId || '']?.title}</h2>
       <ViewStateParam
         stateMachine={stateMachine}
         stateParam={stateParam}
         stepInfo={stepInfo}
+        onEventCallback={onEventCallback}
       />
     </div>
   ) : null;
