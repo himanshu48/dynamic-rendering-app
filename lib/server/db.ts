@@ -21,8 +21,8 @@ const state_machine = `
 const state_machine_routing = `
     CREATE TABLE IF NOT EXISTS "state_machine_routing" (
 	    "id" SERIAL PRIMARY KEY,
-	    "current_state_id" integer,
-	    "next_state_id" integer,
+	    "current_state_key" VARCHAR(100),
+	    "next_state_key" VARCHAR(100),
 	    "op_id" VARCHAR(100) NOT NULL
     );`;
 

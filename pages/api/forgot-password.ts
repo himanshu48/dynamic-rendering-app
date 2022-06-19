@@ -1,6 +1,3 @@
-import jwt from 'jsonwebtoken';
-import cookie from 'cookie';
-
 import { StateMachineKey } from "@lib/server/constants/stateMachineKey";
 import { StateParamsKey } from "@lib/server/constants/stateMachineParamsKey";
 import { StateMachineDal } from "@lib/server/dal/stateMachine";
@@ -8,7 +5,6 @@ import { UserDal } from "@lib/server/dal/user";
 import { Exception } from "@lib/server/exception/exception";
 import { StateMachineResponse } from "@lib/server/interface/stateMachineResponse";
 import {
-  comparePassword,
   validateStateMachineInit,
   validateStateMachineNextStep,
   validateStateParams,
@@ -18,7 +14,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 const stateMachineDal = new StateMachineDal();
 const userDal = new UserDal();
 
-const opId = "LOGIN";
+const opId = "FORGOT_PASSWORD";
 
 export default async function handler(
   req: NextApiRequest,
@@ -31,36 +27,21 @@ export default async function handler(
     if (res1 !== null) {
       res
         .status(200)
-        .json({ responseData: res1 as any, responseInfo: { type: "success" } });
+        .json({ responseData: res1, responseInfo: { type: "success" } });
     } else {
       const currentState = await stateMachineDal.getStateById(obj.stateId);
       const requestParamsMapped = await validateStateParams(
-        currentState?.parameterOrder.split(",")||[],
+        currentState?.parameterOrder.split(",") || [],
         obj.requestParams
       );
 
-      if (currentState?.stateKey === StateMachineKey.loginInitial) {
-        await loginInitial(requestParamsMapped);
+      if (currentState.stateKey === StateMachineKey.forgotPasswordInitial) {
+        await forgotPasswordInitial(requestParamsMapped);
       }
 
-      const res3 = await validateStateMachineNextStep(currentState?.stateKey, opId);
-      if(res3?.operationCompleted) {
-        const token = jwt.sign({ foo: 'bar' }, process.env.JWT_TOKEN as string, { expiresIn: '24h' });
-        
-        res.setHeader('Set-Cookie', [
-          cookie.serialize('token', `Bearer ${token}`, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            maxAge: 60 * 60 * 24,
-            sameSite: 'strict',
-            path: '/'
-          })
-        ]);
-
-      }
-
+      const res3 = await validateStateMachineNextStep(currentState.stateKey, opId);
       res.status(200).json({
-        responseData: res3 as any,
+        responseData: res3,
         responseInfo: {
           type: "success",
         },
@@ -79,17 +60,5 @@ export default async function handler(
   }
 }
 
-const loginInitial = async (reqParams: any) => {
-  const user = await userDal.getUserByUsername(
-    reqParams[StateParamsKey.username]
-  );
-
-  const status = await comparePassword(
-    reqParams[StateParamsKey.password],
-    user.password
-  );
-
-  if (!status) {
-    throw new Exception(400, "Incorrect Password.");
-  }
+const forgotPasswordInitial = async (reqParams: any) => {
 };

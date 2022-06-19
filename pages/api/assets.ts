@@ -1,6 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { StateMachineDal } from "@lib/server/dal/stateMachine";
 import { StateMachineParamsDal } from "@lib/server/dal/stateMachineParameters";
+import { IStateMachine } from "@lib/server/interface/stateMachine";
+import { IStateMachineParams } from "@lib/server/interface/stateMachineParams";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 type Data = {
@@ -18,38 +20,18 @@ export default async function handler(
   const stateMachineData = await stateMachineDal.getAllStates();
   const stateMachineParamData = await stateMachineParamsDal.getAllStateParam();
 
-  const stateMachine = stateMachineData.rows.reduce(
-    (a, c) => ({
+  const stateMachine = stateMachineData.reduce(
+    (a: any, c: IStateMachine) => ({
       ...a,
-      [c.state_id]: {
-        description: c.description,
-        parameterOrder: c.parameter_order,
-        stateId: c.state_id,
-        stateName: c.state_name,
-        stateKey: c.state_key,
-        title: c.title,
-      },
+      [c.stateId]: c,
     }),
     {}
   );
 
-  const stateParams = stateMachineParamData.rows.reduce(
-    (a, c) => ({
+  const stateParams = stateMachineParamData.reduce(
+    (a: any, c: IStateMachineParams) => ({
       ...a,
-      [c.state_param_id]: {
-        stateParamId: c.state_param_id,
-        stateParamKey: c.state_param_key,
-        displayOnUI: c.displayOnUI,
-        displayLabel: c.display_label,
-        helpText: c.help_text,
-        max_length: c.maxLength,
-        minLength: c.min_length,
-        optionalField: c.optional_field,
-        paramType: c.param_type,
-        required: c.required,
-        showHelpText: c.showHelpText,
-        validPossibleValues: c.valid_possible_values,
-      },
+      [c.stateParamId]: c,
     }),
     {}
   );

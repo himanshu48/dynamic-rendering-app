@@ -1,6 +1,6 @@
 export type StateMachineResponse = {
   responseData: {
-    nextStateId: string | null
+    nextStateId: number | null
     nextStateParams: any | null
     operationCompleted: boolean
   },

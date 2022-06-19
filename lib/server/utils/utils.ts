@@ -3,6 +3,7 @@ import { StateMachineDal } from "../dal/stateMachine";
 import { StateMachineParamsDal } from "../dal/stateMachineParameters";
 import { StateMachineRoutingDal } from "../dal/stateMachineRouting";
 import { Exception } from "../exception/exception";
+import { IStateMachineParams } from "../interface/stateMachineParams";
 
 const stateMachineDal = new StateMachineDal();
 const stateMachineParamsDal = new StateMachineParamsDal();
@@ -30,15 +31,15 @@ export const validateStateMachineInit = async (
   }
 
   if (Object.keys(obj.requestParams).length === 0 && obj.stateId === null) {
-    const nextStateId = await stateMachineRoutingDal.getNextStateIdById(
+    const nextStateKey = await stateMachineRoutingDal.getNextStateKeyByKey(
       opId,
-      0
+      null
     );
-    const res2 = await stateMachineDal.getStateById(nextStateId);
-    const params = res2.parameter_order;
+    const res2 = await stateMachineDal.getStateByKey(nextStateKey);
+    const params = res2?.parameterOrder;
 
     return {
-      nextStateId,
+      nextStateId: res2?.stateId,
       nextStateParams: params
         .split(",")
         .reduce((a: object, c: string) => ({ ...a, [c]: null }), {}),
@@ -49,24 +50,24 @@ export const validateStateMachineInit = async (
 };
 
 export const validateStateMachineNextStep = async (
-  stateId: number,
+  stateKey: string,
   opId: string
 ) => {
-  const nextStateId = await stateMachineRoutingDal.getNextStateIdById(
+  const nextStateKey = await stateMachineRoutingDal.getNextStateKeyByKey(
     opId,
-    stateId
+    stateKey
   );
-  if (nextStateId === 0) {
+  if (nextStateKey === null) {
     return {
       nextStateId: null,
       nextStateParams: null,
       operationCompleted: true,
     };
   }
-  const res = await stateMachineDal.getStateById(nextStateId);
-  const params = res.parameter_order;
+  const res = await stateMachineDal.getStateByKey(nextStateKey);
+  const params = res?.parameterOrder;
   return {
-    nextStateId,
+    nextStateId: res?.stateId,
     nextStateParams: params
     .split(",")
     .reduce((a: object, c: string) => ({ ...a, [c]: null }), {}),
@@ -75,63 +76,55 @@ export const validateStateMachineNextStep = async (
 };
 
 const validateStateParam = (
-  stateParam: {
-    param_type: string;
-    optional_field: boolean;
-    display_label: string;
-    valid_possible_values: any[];
-    min_length: number;
-    max_length: number;
-    regex: string | RegExp;
-  },
+  stateParam: IStateMachineParams,
   value: string | null | undefined
 ) => {
-  if (["text", "email", "password"].includes(stateParam.param_type)) {
+  if (["text", "email", "password"].includes(stateParam.paramType)) {
     if (value === null || value === undefined) {
-      if (!stateParam.optional_field) {
-        throw new Exception(400, `${stateParam.display_label} is required`);
+      if (!stateParam?.optionalField) {
+        throw new Exception(400, `${stateParam?.displayLabel} is required`);
       }
       return;
     }
 
     if (
-      stateParam.valid_possible_values &&
-      !stateParam.valid_possible_values.includes(value)
+      stateParam.validPossibleValues &&
+      !stateParam.validPossibleValues.includes(value)
     ) {
       throw new Exception(
         400,
         "Invalid value:: value must be one of these " +
-          stateParam.valid_possible_values.join(", ")
+          stateParam.validPossibleValues
       );
     }
 
-    if (stateParam.min_length > 0) {
-      if (value.length < stateParam.min_length) {
+    if (stateParam?.minLength && stateParam.minLength > 0) {
+      if (value.length < stateParam?.minLength) {
         throw new Exception(
           400,
-          `min length of ${stateParam.display_label} should be ${stateParam.min_length}`
+          `min length of ${stateParam.displayLabel} should be ${stateParam.minLength}`
         );
       }
     }
 
-    if (stateParam.max_length > 0) {
-      if (value.length > stateParam.max_length) {
+    if (stateParam?.maxLength && stateParam.maxLength > 0) {
+      if (value.length > stateParam.maxLength) {
         throw new Exception(
           400,
-          `max length of ${stateParam.display_label} should be ${stateParam.max_length}`
+          `max length of ${stateParam.displayLabel} should be ${stateParam.maxLength}`
         );
       }
     }
 
-    if (stateParam.regex) {
+    if (stateParam?.regex) {
       if (!value.match(new RegExp(stateParam.regex))) {
         throw new Exception(400, "Please enter a valid value.");
       }
     }
-    if (stateParam.param_type === "email") {
+    if (stateParam.paramType === "email") {
       validateEmail(value);
     }
-    if (stateParam.param_type === "password") {
+    if (stateParam.paramType === "password") {
       validatePassword(value);
     }
   }
@@ -159,7 +152,7 @@ export const validateStateParams = async (
       parseInt(id)
     );
     validateStateParam(stateParam, requestParams[id]);
-    temp[stateParam.state_param_key] = requestParams[id]
+    temp[stateParam?.stateParamKey] = requestParams[id]
     return stateParam;
   });
 

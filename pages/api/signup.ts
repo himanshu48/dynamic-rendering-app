@@ -28,25 +28,26 @@ export default async function handler(
     if (res1 !== null) {
       res
         .status(200)
-        .json({ responseData: res1, responseInfo: { type: "success" } });
-    }
-    const currentState = await stateMachineDal.getStateById(obj.stateId);
-    const requestParamsMapped = await validateStateParams(
-      currentState.parameter_order.split(","),
-      obj.requestParams
-    );
+        .json({ responseData: res1 as any, responseInfo: { type: "success" } });
+    } else {
+      const currentState = await stateMachineDal.getStateById(obj.stateId);
+      const requestParamsMapped = await validateStateParams(
+        currentState?.parameterOrder.split(",") || [],
+        obj.requestParams
+      );
 
-    if(currentState.state_key === StateMachineKey.signupInitial) {
-      await signUpInitial(requestParamsMapped)
-    }
+      if (currentState?.stateKey === StateMachineKey.signupInitial) {
+        await signUpInitial(requestParamsMapped);
+      }
 
-    const res3 = await validateStateMachineNextStep(obj.stateId, opId);
-    res.status(200).json({
-      responseData: res3,
-      responseInfo: {
-        type: "success",
-      },
-    });
+      const res3 = await validateStateMachineNextStep(currentState?.stateKey, opId);
+      res.status(200).json({
+        responseData: res3 as any,
+        responseInfo: {
+          type: "success",
+        },
+      });
+    }
   } catch (error: any) {
     console.warn(error);
     res.status(400).json({
@@ -60,17 +61,20 @@ export default async function handler(
   }
 }
 
-const signUpInitial = async(reqParams: any) => {
-  if(reqParams[StateParamsKey.password] !== reqParams[StateParamsKey.confirmPassword]) {
+const signUpInitial = async (reqParams: any) => {
+  if (
+    reqParams[StateParamsKey.password] !==
+    reqParams[StateParamsKey.confirmPassword]
+  ) {
     throw new Exception(400, "Password and Confirm password are not same.");
   }
 
-  const password = await encryptPassword(reqParams[StateParamsKey.password])
-  
+  const password = await encryptPassword(reqParams[StateParamsKey.password]);
+
   return userDal.create({
-    name:reqParams[StateParamsKey.fullName],
-    username:reqParams[StateParamsKey.username],
+    name: reqParams[StateParamsKey.fullName],
+    username: reqParams[StateParamsKey.username],
     email: reqParams[StateParamsKey.email],
-    password
-  })
-}
+    password,
+  });
+};
